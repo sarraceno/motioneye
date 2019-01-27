@@ -68,18 +68,18 @@ _KNOWN_MOTION_OPTIONS = {
     'emulate_motion',
     'event_gap',
     'ffmpeg_bps',
-    'ffmpeg_output_debug_movies',
-    'ffmpeg_output_movies',
-    'ffmpeg_variable_bitrate',
-    'ffmpeg_video_codec',
+    'movie_output_motion',
+    'movie_output',
+    'movie_quality',
+    'movie_codec',
     'framerate',
     'height',
     'hue',
-    'lightswitch',
+    'lightswitch_percent',
     'locate_motion_mode',
     'locate_motion_style',
     'mask_file',
-    'max_movie_time',
+    'movie_max_time',
     'minimum_motion_frames',
     'movie_filename',
     'netcam_keepalive',
@@ -92,13 +92,13 @@ _KNOWN_MOTION_OPTIONS = {
     'on_event_start',
     'on_movie_end',
     'on_picture_save',
-    'output_debug_pictures',
+    'picture_output_motion',
     'output_motion',
-    'output_pictures',
+    'picture_output',
     'picture_filename',
     'post_capture',
     'pre_capture',
-    'quality',
+    'picture_quality',
     'rotate',
     'rtsp_uses_tcp',
     'saturation',
@@ -114,7 +114,7 @@ _KNOWN_MOTION_OPTIONS = {
     'stream_quality',
     'target_dir',
     'text_changes',
-    'text_double',
+    'text_scale',
     'text_left',
     'text_right',
     'threshold',
@@ -361,19 +361,19 @@ def get_camera(camera_id, as_lines=False):
             logging.debug('using old motion config directives')
 
             if 'output_normal' in camera_config:
-                camera_config['output_pictures'] = camera_config.pop('output_normal')
+                camera_config['picture_output'] = camera_config.pop('output_normal')
             if 'output_all' in camera_config:
                 camera_config['emulate_motion'] = camera_config.pop('output_all')
             if 'ffmpeg_cap_new' in camera_config:
-                camera_config['ffmpeg_output_movies'] = camera_config.pop('ffmpeg_cap_new')
+                camera_config['movie_output'] = camera_config.pop('ffmpeg_cap_new')
             if 'ffmpeg_cap_motion' in camera_config:
-                camera_config['ffmpeg_output_debug_movies'] = camera_config.pop('ffmpeg_cap_motion')
+                camera_config['movie_output_motion'] = camera_config.pop('ffmpeg_cap_motion')
             if 'locate' in camera_config:
                 camera_config['locate_motion_mode'] = camera_config.pop('locate')
             if 'jpeg_filename' in camera_config:
                 camera_config['picture_filename'] = camera_config.pop('jpeg_filename')
             if 'max_mpeg_time' in camera_config:
-                camera_config['max_movie_time'] = camera_config.pop('max_mpeg_time')
+                camera_config['movie_max_time'] = camera_config.pop('max_mpeg_time')
             if 'webcam_port' in camera_config:
                 camera_config['stream_port'] = camera_config.pop('webcam_port')
             if 'webcam_quality' in camera_config:
@@ -426,20 +426,20 @@ def set_camera(camera_id, camera_config):
         if old_config_format:
             logging.debug('using old motion config directives')
 
-            if 'output_pictures' in camera_config:
-                camera_config['output_normal'] = camera_config.pop('output_pictures')
+            if 'picture_output' in camera_config:
+                camera_config['output_normal'] = camera_config.pop('picture_output')
             if 'emulate_motion' in camera_config:
                 camera_config['output_all'] = camera_config.pop('emulate_motion')
-            if 'ffmpeg_output_movies' in camera_config:
-                camera_config['ffmpeg_cap_new'] = camera_config.pop('ffmpeg_output_movies')
-            if 'ffmpeg_output_debug_movies' in camera_config:
-                camera_config['ffmpeg_cap_motion'] = camera_config.pop('ffmpeg_output_debug_movies')
+            if 'movie_output' in camera_config:
+                camera_config['ffmpeg_cap_new'] = camera_config.pop('movie_output')
+            if 'movie_output_motion' in camera_config:
+                camera_config['ffmpeg_cap_motion'] = camera_config.pop('movie_output_motion')
             if 'locate_motion_mode' in camera_config:
                 camera_config['locate'] = camera_config.pop('locate_motion_mode')
             if 'picture_filename' in camera_config:
                 camera_config['jpeg_filename'] = camera_config.pop('picture_filename')
-            if 'max_movie_time' in camera_config:
-                camera_config['max_mpeg_time'] = camera_config.pop('max_movie_time')
+            if 'movie_max_time' in camera_config:
+                camera_config['max_mpeg_time'] = camera_config.pop('movie_max_time')
             if 'stream_port' in camera_config:
                 camera_config['webcam_port'] = camera_config.pop('stream_port')
             if 'stream_quality' in camera_config:
@@ -575,7 +575,7 @@ def add_camera(device_details):
 
     elif proto == 'netcam':
         camera_config['netcam_url'] = device_details['url']
-        camera_config['text_double'] = True
+        camera_config['text_scale'] = True
 
         if device_details['username']:
             camera_config['netcam_userpass'] = device_details['username'] + ':' + device_details['password']
@@ -760,7 +760,7 @@ def motion_camera_ui_to_dict(ui, old_config=None):
         # text overlay
         'text_left': '',
         'text_right': '',
-        'text_double': False,
+        'text_scale': False,
 
         # streaming
         'stream_localhost': not ui['video_streaming'],
@@ -774,18 +774,18 @@ def motion_camera_ui_to_dict(ui, old_config=None):
         'stream_authentication': main_config['@normal_username'] + ':' + main_config['@normal_password'],
 
         # still images
-        'output_pictures': False,
+        'picture_output': False,
         'snapshot_interval': 0,
         'picture_filename': '',
         'snapshot_filename': '',
-        'quality': max(1, int(ui['image_quality'])),
+        'picture_quality': max(1, int(ui['image_quality'])),
         '@preserve_pictures': int(ui['preserve_pictures']),
         '@manual_snapshots': ui['manual_snapshots'],
 
         # movies
-        'ffmpeg_output_movies': False,
+        'movie_output': False,
         'movie_filename': ui['movie_file_name'],
-        'max_movie_time': ui['max_movie_length'],
+        'movie_max_time': ui['max_movie_length'],
         '@preserve_movies': int(ui['preserve_movies']),
 
         # motion detection
@@ -795,15 +795,15 @@ def motion_camera_ui_to_dict(ui, old_config=None):
         'locate_motion_mode': ui['show_frame_changes'],
         'noise_tune': ui['auto_noise_detect'],
         'noise_level': max(1, int(round(int(ui['noise_level']) * 2.55))),
-        'lightswitch': ui['light_switch_detect'],
+        'lightswitch_percent': ui['light_switch_detect'],
         'event_gap': int(ui['event_gap']),
         'pre_capture': int(ui['pre_capture']),
         'post_capture': int(ui['post_capture']),
         'minimum_motion_frames': int(ui['minimum_motion_frames']),
         'smart_mask_speed': 0,
         'mask_file': '',
-        'output_debug_pictures': ui['create_debug_media'],
-        'ffmpeg_output_debug_movies': ui['create_debug_media'],
+        'picture_output_motion': ui['create_debug_media'],
+        'movie_output_motion': ui['create_debug_media'],
 
         # working schedule
         '@working_schedule': '',
@@ -946,7 +946,7 @@ def motion_camera_ui_to_dict(ui, old_config=None):
             data['text_right'] = ui['custom_right_text']
 
         if proto == 'netcam' or data['width'] > _TEXT_DOUBLE_THRESHOLD:
-            data['text_double'] = True
+            data['text_scale'] = True
 
     if ui['still_images']:
         data['picture_filename'] = ui['image_file_name']
@@ -954,24 +954,24 @@ def motion_camera_ui_to_dict(ui, old_config=None):
 
         capture_mode = ui['capture_mode']
         if capture_mode == 'motion-triggered':
-            data['output_pictures'] = True
+            data['picture_output'] = True
 
         elif capture_mode == 'motion-triggered-one':
-            data['output_pictures'] = 'best'
+            data['picture_output'] = 'best'
 
         elif capture_mode == 'interval-snapshots':
             data['snapshot_interval'] = int(ui['snapshot_interval'])
 
         elif capture_mode == 'all-frames':
-            data['output_pictures'] = True
+            data['picture_output'] = True
             data['emulate_motion'] = True
 
         elif capture_mode == 'manual':
-            data['output_pictures'] = False
+            data['picture_output'] = False
             data['emulate_motion'] = False
 
     if ui['movies']:
-        data['ffmpeg_output_movies'] = True
+        data['movie_output'] = True
         recording_mode = ui['recording_mode']
         if recording_mode == 'motion-triggered':
             data['emulate_motion'] = False
@@ -979,10 +979,10 @@ def motion_camera_ui_to_dict(ui, old_config=None):
         elif recording_mode == 'continuous':
             data['emulate_motion'] = True
 
-    data['ffmpeg_video_codec'] = ui['movie_format']
+    data['movie_codec'] = ui['movie_format']
     q = int(ui['movie_quality'])
     if motionctl.needs_ffvb_quirks():
-        if data['ffmpeg_video_codec'] in _EXPONENTIAL_QUALITY_CODECS:
+        if data['movie_codec'] in _EXPONENTIAL_QUALITY_CODECS:
             vbr = max(1, _MAX_FFMPEG_VARIABLE_BITRATE * (1 - math.log(max(1, q * _EXPONENTIAL_QUALITY_FACTOR),
                                                                       _EXPONENTIAL_QUALITY_FACTOR * 100)))
 
@@ -992,7 +992,7 @@ def motion_camera_ui_to_dict(ui, old_config=None):
     else:
         vbr = max(1, q)
 
-    data['ffmpeg_variable_bitrate'] = int(vbr)
+    data['movie_quality'] = int(vbr)
 
     # motion detection
 
@@ -1179,7 +1179,7 @@ def motion_camera_dict_to_ui(data):
         'still_images': False,
         'capture_mode': 'motion-triggered',
         'image_file_name': '%Y-%m-%d/%H-%M-%S',
-        'image_quality': data['quality'],
+        'image_quality': data['picture_quality'],
         'snapshot_interval': 0,
         'preserve_pictures': data['@preserve_pictures'],
         'manual_snapshots': data['@manual_snapshots'],
@@ -1188,7 +1188,7 @@ def motion_camera_dict_to_ui(data):
         'movies': False,
         'recording_mode': 'motion-triggered',
         'movie_file_name': data['movie_filename'],
-        'max_movie_length': data['max_movie_time'],
+        'max_movie_length': data['movie_max_time'],
         'preserve_movies': data['@preserve_movies'],
 
         # motion detection
@@ -1196,7 +1196,7 @@ def motion_camera_dict_to_ui(data):
         'show_frame_changes': data['text_changes'] or data['locate_motion_mode'],
         'auto_noise_detect': data['noise_tune'],
         'noise_level': int(int(data['noise_level']) / 2.55),
-        'light_switch_detect': data['lightswitch'],
+        'light_switch_detect': data['lightswitch_percent'],
         'despeckle_filter': data['despeckle_filter'],
         'event_gap': int(data['event_gap']),
         'pre_capture': int(data['pre_capture']),
@@ -1206,7 +1206,7 @@ def motion_camera_dict_to_ui(data):
         'mask_type': 'smart',
         'smart_mask_sluggishness': 5,
         'mask_lines': [],
-        'create_debug_media': data['ffmpeg_output_debug_movies'] or data['output_debug_pictures'],
+        'create_debug_media': data['movie_output_motion'] or data['picture_output_motion'],
 
         # motion notifications
         'email_notifications_enabled': False,
@@ -1365,7 +1365,7 @@ def motion_camera_dict_to_ui(data):
             ui['custom_right_text'] = text_right
 
     emulate_motion = data['emulate_motion']
-    output_pictures = data['output_pictures']
+    output_pictures = data['picture_output']
     picture_filename = data['picture_filename']
     snapshot_interval = data['snapshot_interval']
     snapshot_filename = data['snapshot_filename']
@@ -1398,7 +1398,7 @@ def motion_camera_dict_to_ui(data):
         if snapshot_filename:
             ui['image_file_name'] = snapshot_filename
 
-    if data['ffmpeg_output_movies']:
+    if data['movie_output']:
         ui['movies'] = True
 
     if emulate_motion:
@@ -1407,11 +1407,11 @@ def motion_camera_dict_to_ui(data):
     else:
         ui['recording_mode'] = 'motion-triggered'
 
-    ui['movie_format'] = data['ffmpeg_video_codec']
+    ui['movie_format'] = data['movie_codec']
 
-    bitrate = data['ffmpeg_variable_bitrate']
+    bitrate = data['movie_quality']
     if motionctl.needs_ffvb_quirks():
-        if data['ffmpeg_video_codec'] in _EXPONENTIAL_QUALITY_CODECS:
+        if data['movie_codec'] in _EXPONENTIAL_QUALITY_CODECS:
             q = (100 * _EXPONENTIAL_QUALITY_FACTOR) ** \
                 (1 - float(bitrate) / _MAX_FFMPEG_VARIABLE_BITRATE) / _EXPONENTIAL_QUALITY_FACTOR
 
@@ -1932,7 +1932,7 @@ def _set_default_motion(data, old_config_format):
 
     else:
         data.setdefault('webcontrol_port', settings.MOTION_CONTROL_PORT)
-        data.setdefault('webcontrol_html_output', True)
+        data.setdefault('webcontrol_interface', True)
         data.setdefault('webcontrol_localhost', settings.MOTION_CONTROL_LOCALHOST)
         data.setdefault('webcontrol_parms', 2)  # the advanced list of parameters will be available
 
@@ -1985,7 +1985,7 @@ def _set_default_motion_camera(camera_id, data):
 
     data.setdefault('text_left', data['@name'])
     data.setdefault('text_right', '%Y-%m-%d\\n%T')
-    data.setdefault('text_double', False)
+    data.setdefault('text_scale', False)
 
     data.setdefault('@motion_detection', True)
     data.setdefault('text_changes', False)
@@ -1995,47 +1995,47 @@ def _set_default_motion_camera(camera_id, data):
     data.setdefault('threshold', 2000)
     data.setdefault('noise_tune', True)
     data.setdefault('noise_level', 32)
-    data.setdefault('lightswitch', 0)
+    data.setdefault('lightswitch_percent', 0)
     data.setdefault('despeckle_filter', '')
     data.setdefault('minimum_motion_frames', 20)
     data.setdefault('smart_mask_speed', 0)
     data.setdefault('mask_file', '')
-    data.setdefault('ffmpeg_output_debug_movies', False)
-    data.setdefault('output_debug_pictures', False)
+    data.setdefault('movie_output_motion', False)
+    data.setdefault('picture_output_motion', False)
 
     data.setdefault('pre_capture', 1)
     data.setdefault('post_capture', 1)
 
-    data.setdefault('output_pictures', False)
+    data.setdefault('picture_output', False)
     data.setdefault('picture_filename', '')
     data.setdefault('emulate_motion', False)
     data.setdefault('event_gap', 30)
 
     data.setdefault('snapshot_interval', 0)
     data.setdefault('snapshot_filename', '')
-    data.setdefault('quality', 85)
+    data.setdefault('picture_quality', 85)
     data.setdefault('@preserve_pictures', 0)
     data.setdefault('@manual_snapshots', True)
 
     data.setdefault('movie_filename', '%Y-%m-%d/%H-%M-%S')
-    data.setdefault('max_movie_time', 0)
-    data.setdefault('ffmpeg_output_movies', False)
+    data.setdefault('movie_max_time', 0)
+    data.setdefault('movie_output', False)
     if motionctl.has_new_movie_format_support():
         if motionctl.has_h264_omx_support():
-            data.setdefault('ffmpeg_video_codec', 'mp4:h264_omx')  # will use h264 codec
+            data.setdefault('movie_codec', 'mp4:h264_omx')  # will use h264 codec
 
         else:
-            data.setdefault('ffmpeg_video_codec', 'mp4')  # will use h264 codec
+            data.setdefault('movie_codec', 'mp4')  # will use h264 codec
 
         if motionctl.needs_ffvb_quirks():
-            data.setdefault('ffmpeg_variable_bitrate', _MAX_FFMPEG_VARIABLE_BITRATE / 4)  # 75%
+            data.setdefault('movie_quality', _MAX_FFMPEG_VARIABLE_BITRATE / 4)  # 75%
 
         else:
-            data.setdefault('ffmpeg_variable_bitrate', 75)  # 75%
+            data.setdefault('movie_quality', 75)  # 75%
 
     else:
-        data.setdefault('ffmpeg_video_codec', 'msmpeg4')
-        data.setdefault('ffmpeg_variable_bitrate', _EXPONENTIAL_DEF_QUALITY)
+        data.setdefault('movie_codec', 'msmpeg4')
+        data.setdefault('movie_quality', _EXPONENTIAL_DEF_QUALITY)
 
     data.setdefault('@preserve_movies', 0)
     data.setdefault('@manual_record', False)
